@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colour6</title>
+
+<link rel="manifest" href="manifest.json">
+
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white min-h-screen flex items-center justify-center">
+
+<div id="startScreen" class="text-center">
+
+    <h1 class="text-6xl font-black mb-6">
+        Colour6.3
+    </h1>
+
+    <button
+        id="drawButton"
+        class="bg-white text-black px-8 py-4 rounded-2xl font-bold">
+        Farbe ziehen 🎲
+    </button>
+
+</div>
+
+<div id="cameraScreen" class="hidden text-center">
+
+    <h2
+        id="teamName"
+        class="text-4xl font-bold mb-6">
+        Team
+    </h2>
+
+    <div
+        id="colorCircle"
+        class="w-32 h-32 rounded-full mx-auto">
+    </div>
+
+    <video
+        id="video"
+        autoplay
+        playsinline
+        muted
+        class="mt-8 w-80 rounded-3xl border border-neutral-700">
+    </video>
+
+    <p class="mt-4 text-neutral-400">
+        Fotos:
+        <span id="photoCount">0</span>
+        / 6
+    </p>
+
+    <div class="flex items-center justify-center gap-6 mt-6">
+
+        <button
+    id="showPhotosButton"
+    class="bg-neutral-800 px-4 py-2 rounded-xl">
+    Fotos
+</button>
+
+        <button
+            id="captureButton"
+            class="w-20 h-20 rounded-full border-4 border-white">
+        </button>
+
+    </div>
+
+</div>
+<div
+    id="galleryOverlay"
+    class="hidden fixed inset-0 bg-black p-6 overflow-auto">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <h2 class="text-2xl font-bold">
+            Galerie
+        </h2>
+
+        <button
+            id="closeGallery"
+            class="bg-neutral-800 px-4 py-2 rounded-xl">
+            Schließen
+        </button>
+
+    </div>
+
+    <div
+        id="galleryGrid"
+        class="grid grid-cols-2 gap-4">
+    </div>
+
+</div>
+
+<div
+    id="collageScreen"
+    class="hidden text-center">
+
+    <h2
+        class="text-3xl font-bold mb-6">
+        Deine Collage
+    </h2>
+
+    <img
+        id="collageImage"
+        class="w-80 rounded-3xl">
+
+<button
+    id="downloadButton"
+    class="mt-6 bg-white text-black px-6 py-3 rounded-2xl font-bold">
+    💾 Collage speichern
+</button>
+<button
+    id="shareButton"
+    class="mt-3 bg-neutral-800 text-white px-6 py-3 rounded-2xl font-bold">
+    📤 Teilen
+</button>
+<button
+    id="restartButton"
+    class="mt-3 bg-red-600 text-white px-6 py-3 rounded-2xl font-bold">
+    🔄 Neue Runde
+</button>
+</div>
+
+
+<script>
+
+
+let photos = [];
+let selectedColor = null;
+let selectedTeamName = "";
+const colors = [
+    {
+        name: "Rot",
+        hex: "#ef4444"
+    },
+    {
+        name: "Blau",
+        hex: "#3b82f6"
+    },
+    {
+        name: "Grün",
+        hex: "#10b981"
+    },
+    {
+        name: "Gelb",
+        hex: "#f59e0b"
+    }
+];
+
+const drawButton =
+document.getElementById("drawButton");
+
+const startScreen =
+document.getElementById("startScreen");
+
+const cameraScreen =
+document.getElementById("cameraScreen");
+
+const teamName =
+document.getElementById("teamName");
+
+const colorCircle =
+document.getElementById("colorCircle");
+
+const video =
+document.getElementById("video");
+const photoCount =
+document.getElementById("photoCount");
+
+const captureButton =
+document.getElementById("captureButton");
+console.log(captureButton);
+
+const showPhotosButton =
+document.getElementById("showPhotosButton");
+
+const galleryOverlay =
+document.getElementById("galleryOverlay");
+
+const closeGallery =
+document.getElementById("closeGallery");
+
+const galleryGrid =
+document.getElementById("galleryGrid");
+const collageScreen =
+document.getElementById("collageScreen");
+
+const collageImage =
+document.getElementById("collageImage");
+const downloadButton =
+document.getElementById("downloadButton");
+const shareButton =
+document.getElementById("shareButton");
+const restartButton =
+document.getElementById("restartButton");
+
+console.log(showPhotosButton);
+console.log(galleryOverlay);
+console.log(closeGallery);
+console.log(galleryGrid);
+
+async function startCamera() {
+
+    try {
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment"
+                },
+                audio: false
+            });
+
+        video.srcObject = stream;
+
+    } catch (error) {
+
+        alert("Kamera konnte nicht gestartet werden.");
+
+        console.error(error);
+
+    }
+
+}
+
+
+drawButton.addEventListener("click", async () => {
+    const randomColor =
+        colors[Math.floor(Math.random() * colors.length)];
+selectedColor =
+    randomColor;
+
+    teamName.textContent =
+        "Team " + randomColor.name;
+selectedTeamName =
+    "Team " + randomColor.name;
+
+    teamName.style.color =
+        randomColor.hex;
+
+    colorCircle.style.backgroundColor =
+        randomColor.hex;
+
+    startScreen.classList.add("hidden");
+
+    cameraScreen.classList.remove("hidden");
+await startCamera();
+
+});
+/*galleryButton.addEventListener("click", () => {
+
+    galleryGrid.innerHTML = "";
+
+    photos.forEach((photo) => {
+
+        const img =
+            document.createElement("img");
+
+        img.src = photo;
+
+        img.className =
+            "rounded-xl w-full";
+
+        galleryGrid.appendChild(img);
+
+    });
+
+    galleryOverlay.classList.remove(
+        "hidden"
+    );
+
+});
+closeGallery.addEventListener("click", () => {
+
+    galleryOverlay.classList.add(
+        "hidden"
+    );
+
+});*/
+
+captureButton.onclick = () => {
+
+    if (photos.length >= 6) {
+        return;
+    }
+
+    if (!video.videoWidth) {
+
+        alert("Kamera lädt noch");
+
+        return;
+
+    }
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+    const ctx =
+        canvas.getContext("2d");
+
+
+    ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    const image =
+        canvas.toDataURL(
+            "image/jpeg",
+            0.9
+        );
+
+    photos.push(image);
+console.log(image.substring(0,50));
+
+    photoCount.textContent =
+        photos.length;
+
+    if (photos.length === 6) {
+
+    createCollage();
+
+}
+
+};
+
+showPhotosButton.onclick = () => {
+
+    galleryGrid.innerHTML = "";
+if (photos.length === 0) {
+
+    galleryGrid.innerHTML =
+        "<p>Keine Fotos vorhanden</p>";
+
+    galleryOverlay.classList.remove("hidden");
+
+    return;
+}
+
+    photos.forEach((photo, index) => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "relative";
+
+        item.innerHTML = `
+            <img
+                src="${photo}"
+                class="rounded-xl w-full">
+
+            <button
+                onclick="deletePhoto(${index})"
+                class="absolute top-2 right-2 bg-red-600 w-8 h-8 rounded-full text-white">
+                ×
+            </button>
+        `;
+
+        galleryGrid.appendChild(item);
+
+    });
+
+    galleryOverlay.classList.remove(
+        "hidden"
+    );
+
+};
+
+closeGallery.onclick = () => {
+
+    galleryOverlay.classList.add(
+        "hidden"
+    );
+
+};
+window.deletePhoto = function(index) {
+
+    photos.splice(index, 1);
+
+    photoCount.textContent =
+        photos.length;
+
+    showPhotosButton.onclick();
+
+}
+function createCollage() {
+
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width = 900;
+    canvas.height = 1350;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    /* Farber Rahmen */
+
+ctx.fillStyle =
+    selectedColor.hex;
+
+ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+);
+
+/* Weißer Innenbereich */
+
+ctx.fillStyle =
+    "white";
+
+ctx.fillRect(
+    35,
+    35,
+    canvas.width - 70,
+    canvas.height - 70
+);
+ctx.fillStyle =
+    selectedColor.hex;
+
+ctx.font =
+    "bold 40px Arial";
+
+ctx.textAlign =
+    "center";
+
+ctx.fillText(
+    selectedTeamName,
+    canvas.width / 2,
+    140
+);
+ctx.strokeStyle =
+    selectedColor.hex;
+
+ctx.lineWidth = 2;
+
+ctx.beginPath();
+
+ctx.moveTo(150, 170);
+
+ctx.lineTo(750, 170);
+
+ctx.stroke();
+
+
+
+    let loaded = 0;
+
+    photos.forEach((photo, index) => {
+
+        const img =
+            new Image();
+
+        img.onload = () => {
+
+            const col =
+                index % 2;
+
+            const row =
+                Math.floor(index / 2);
+
+            const x =
+                55 + (col * 395);
+
+            const y =
+                190 + (row * 340);
+
+            ctx.shadowColor = "rgba(0,0,0,0.35)";
+ctx.shadowBlur = 20;
+ctx.shadowOffsetX = 5;
+ctx.shadowOffsetY = 5;
+
+ctx.fillStyle = "white";
+
+ctx.fillRect(
+    x - 10,
+    y - 10,
+    390,
+    470
+);
+
+ctx.shadowColor = "transparent";
+
+ctx.drawImage(
+    img,
+    x,
+    y,
+    370,
+    350
+);
+
+
+            loaded++;
+
+            if (loaded === photos.length) {
+
+                cameraScreen.classList.add(
+                    "hidden"
+                );
+
+                collageScreen.classList.remove(
+                    "hidden"
+                );
+
+                const finalImage =
+    canvas.toDataURL(
+        "image/jpeg",
+        0.95
+    );
+ctx.fillStyle = "#666666";
+
+ctx.font = "bold 24px Arial";
+
+ctx.textAlign = "center";
+
+ctx.fillText(
+    "Colour6",
+    canvas.width /2,
+    canvas.height - 15
+);
+collageImage.src =
+    finalImage;
+
+downloadButton.onclick = () => {
+
+    const link =
+        document.createElement("a");
+
+    link.href =
+        finalImage;
+
+    link.download =
+        "colour61-collage.jpg";
+
+    link.click();
+
+};
+shareButton.onclick = async () => {
+
+    try {
+
+        const response =
+            await fetch(finalImage);
+
+        const blob =
+            await response.blob();
+
+        const file =
+            new File(
+                [blob],
+                "colour61-collage.jpg",
+                {
+                    type: "image/jpeg"
+                }
+            );
+
+        if (navigator.share) {
+
+            await navigator.share({
+
+                title: "Colour6.1",
+
+                text: "Meine Colour6.1 Collage",
+
+                files: [file]
+
+            });
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+};
+
+            }
+
+        };
+
+        img.src = photo;
+
+    });
+
+}
+restartButton.onclick = () => {
+
+    photos = [];
+
+    photoCount.textContent = "0";
+
+    collageScreen.classList.add(
+        "hidden"
+    );
+
+    startScreen.classList.remove(
+        "hidden"
+    );
+
+};
+</script>
+
+
+
+</body>
+</html>
